@@ -16,12 +16,33 @@ const client = new MongoClient(
 async function connectToMongoDB() {
   try {
     await client.connect();
+    const careerDB = client.db("careerCodeDB");
+    const jobsCollection = careerDB.collection("jobs");
+
+    app.get("/jobs", async (req, res) => {
+      const cursor = jobsCollection.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
+    app.get("/popular-jobs", async (req, res) => {
+      const result = await jobsCollection
+        .find({ popular: true })
+        .sort({ experience: -1 })
+        .limit(6)
+        .project({ title: -1, company: -1, category: -1, company_logo: -1 })
+        .toArray();
+      res.send(result);
+    });
+
     console.log("You successfully connected to MongoDB!");
     return client;
   } finally {
   }
 }
-connectToMongoDB().catch(console.dir("error "));
+connectToMongoDB().catch((err) => {
+  console.dir("error h", err);
+});
 
 // Call this only when your application terminates
 // export async function disconnectFromMongoDB() {
