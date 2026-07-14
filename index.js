@@ -29,8 +29,26 @@ async function connectToMongoDB() {
       const result = await jobsCollection
         .find({ popular: true })
         .sort({ experience: -1 })
-        .limit(6)
-        .project({ title: -1, company: -1, category: -1, company_logo: -1 })
+        .limit(5)
+        .project({ title: -1, company: -1, category: -1, image: -1 })
+        .toArray();
+      res.send(result);
+    });
+
+    app.get("/featured-jobs", async (req, res) => {
+      const result = await jobsCollection
+        .find({ featured: true })
+        .sort({ experience: 1 })
+        .limit(4)
+        .project({
+          title: -1,
+          company: -1,
+          // category: -1,
+          location: -1,
+          company_log: -1,
+          workplace: -1,
+          jobType: -1,
+        })
         .toArray();
       res.send(result);
     });
