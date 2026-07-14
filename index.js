@@ -24,6 +24,11 @@ async function connectToMongoDB() {
       const result = await cursor.toArray();
       res.send(result);
     });
+    app.get("/all-company", async (req, res) => {
+      const cursor = jobsCollection.find().project({ company_log: -1 });
+      const result = await cursor.toArray();
+      res.send(result);
+    });
 
     app.get("/popular-jobs", async (req, res) => {
       const result = await jobsCollection
