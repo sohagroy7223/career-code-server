@@ -20,9 +20,33 @@ async function connectToMongoDB() {
     const jobsCollection = careerDB.collection("jobs");
 
     app.get("/jobs", async (req, res) => {
-      const cursor = jobsCollection.find();
-      const result = await cursor.toArray();
-      res.send(result);
+      const { limit = 0, skip = 0, search = "" } = req.query;
+      // console.log(limit, skip, search);
+
+      const query = {};
+
+      if (search) {
+        query.title = {
+          $regex: search,
+          $options: "i",
+        };
+      }
+
+      const cursor = jobsCollection
+        .find(query)
+        .project({
+          company_log: 1,
+          title: 1,
+          company: 1,
+          jobType: 1,
+          workplace: 1,
+          location: 1,
+        })
+        .limit(Number(limit))
+        .skip(Number(skip));
+      const Jobs = await cursor.toArray();
+      const count = await jobsCollection.countDocuments(query);
+      res.send({ Jobs, total: count });
     });
     app.get("/all-company", async (req, res) => {
       const cursor = jobsCollection.find().project({ company_log: -1 });
@@ -56,6 +80,14 @@ async function connectToMongoDB() {
         })
         .toArray();
       res.send(result);
+    });
+
+    // 404 page
+    app.all(/.*/, (req, res) => {
+      res.status(404).json({
+        status: 404,
+        error: "API not found",
+      });
     });
 
     console.log("You successfully connected to MongoDB!");
