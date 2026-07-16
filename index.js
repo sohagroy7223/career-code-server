@@ -18,7 +18,23 @@ async function connectToMongoDB() {
     await client.connect();
     const careerDB = client.db("careerCodeDB");
     const jobsCollection = careerDB.collection("jobs");
+    const usersCollection = careerDB.collection("users");
 
+    // user related APIS
+    app.post("/users", async (req, res) => {
+      const newUser = req.body;
+      const email = newUser.email;
+      const query = { email: email };
+      const existingUser = await usersCollection.findOne(query);
+      if (existingUser) {
+        return console.log("this user already exist");
+      } else {
+        const result = await usersCollection.insertOne(newUser);
+        res.send(result);
+      }
+    });
+
+    // Jobs Related APIS
     app.get("/jobs", async (req, res) => {
       const { limit = 0, skip = 0, search = "" } = req.query;
       // console.log(limit, skip, search);
