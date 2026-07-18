@@ -1,7 +1,7 @@
 const express = require("express");
 require("dotenv").config();
 // import { MongoClient } from "mongodb";
-const { MongoClient } = require("mongodb");
+const { MongoClient, ObjectId } = require("mongodb");
 const cors = require("cors");
 const app = express();
 const port = process.env.PORT || 3000;
@@ -27,7 +27,7 @@ async function connectToMongoDB() {
       const query = { email: email };
       const existingUser = await usersCollection.findOne(query);
       if (existingUser) {
-        return console.log("this user already exist");
+        return console.log({ message: "this user already exist" });
       } else {
         const result = await usersCollection.insertOne(newUser);
         res.send(result);
@@ -64,6 +64,14 @@ async function connectToMongoDB() {
       const count = await jobsCollection.countDocuments(query);
       res.send({ Jobs, total: count });
     });
+
+    app.get("/jobs/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await jobsCollection.findOne(query);
+      res.send(result);
+    });
+
     app.get("/all-company", async (req, res) => {
       const cursor = jobsCollection.find().project({ company_log: -1 });
       const result = await cursor.toArray();
