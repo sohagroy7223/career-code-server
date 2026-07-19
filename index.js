@@ -19,6 +19,7 @@ async function connectToMongoDB() {
     const careerDB = client.db("careerCodeDB");
     const jobsCollection = careerDB.collection("jobs");
     const usersCollection = careerDB.collection("users");
+    const favoriteJobCollection = careerDB.collection("favoriteJob");
 
     // user related APIS
     app.post("/users", async (req, res) => {
@@ -103,6 +104,20 @@ async function connectToMongoDB() {
           jobType: -1,
         })
         .toArray();
+      res.send(result);
+    });
+
+    // favorite job related apis
+    app.post("/favoriteJob", async (req, res) => {
+      const favJob = req.body;
+      const exist = await favoriteJobCollection.findOne({
+        email: favJob.email,
+        jobId: favJob._id,
+      });
+      if (exist) {
+        return res.send({ message: "this job already exist" });
+      }
+      const result = await favoriteJobCollection.insertOne(favJob);
       res.send(result);
     });
 
