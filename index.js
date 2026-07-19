@@ -121,6 +121,17 @@ async function connectToMongoDB() {
       res.send(result);
     });
 
+    app.get("/favoriteJob", async (req, res) => {
+      const email = req.query.email;
+      const query = {};
+      if (query) {
+        query.email = email;
+      }
+      const cursor = favoriteJobCollection.find(query);
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+
     // 404 page
     app.all(/.*/, (req, res) => {
       res.status(404).json({
