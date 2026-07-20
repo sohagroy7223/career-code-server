@@ -132,6 +132,21 @@ async function connectToMongoDB() {
       res.send(result);
     });
 
+    app.get("/favoriteJob/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await favoriteJobCollection.findOne(query);
+      res.send(result);
+    });
+
+    // delete api
+    app.delete("/favoriteJob/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await favoriteJobCollection.deleteOne(query);
+      res.send(result);
+    });
+
     // 404 page
     app.all(/.*/, (req, res) => {
       res.status(404).json({
